@@ -31,6 +31,7 @@ function make_bone(x,y)
     return make_game_object("bone",x,y,6,6,{
         draw=function(self)
             sspr(24,8,self.width,self.height,self.x,self.y,self.width,self.height)
+            -- self:draw_bounding_box(8)
         end
     })
 end
@@ -49,17 +50,18 @@ function make_player()
                 self.is_facing_right=false
                 self.x-=1
                 self.is_walking=true
-            end
-            if btn(1) then 
+            elseif btn(1) then 
                 self.is_facing_right=true
                 self.x+=1
                 self.is_walking=true
             end
             if btn(2) then 
                 self.y-=1
+                self.is_walking=true
             end
             if btn(3) then 
                 self.y+=1
+                self.is_walking=true
             end
         end,
         draw=function(self)
@@ -72,6 +74,7 @@ function make_player()
                 end
             end
             sspr(sprite_x,0,self.width,self.height,self.x,self.y,self.width,self.height, self.is_facing_right)
+            -- self:draw_bounding_box(9)
         end
     })
 end
@@ -86,6 +89,9 @@ function make_game_object(kind,x,y,width,height,props)
         draw=function(self)
         end,
         update=function(self)
+        end,
+        draw_bounding_box=function(self,col)
+            rect(self.x,self.y,self.x+self.width,self.y+self.height,col)
         end
     }
 
