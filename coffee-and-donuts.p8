@@ -4,14 +4,15 @@ __lua__
 -- coffee and donuts
 -- by andrew edstrom
 
-local player
-local bones
 local game_objects
+local score
 
 function _init()
+    score=0
     game_objects={}
-    make_player()
-    make_bone(75,20)
+    make_dog()
+    make_bone(40,50)
+    make_bone(80,80)
 end
 
 function _update()
@@ -22,6 +23,7 @@ end
 
 function _draw()
     cls(3)
+    print(score,5,5,7)
     for obj in all(game_objects) do
         obj:draw()
     end
@@ -29,18 +31,31 @@ end
 
 function make_bone(x,y)
     return make_game_object("bone",x,y,6,6,{
+        eaten=false,
+        update=function(self)
+            foreach_game_object_of_kind("dog", function(dog)
+                if not self.eaten and rects_overlapping(self.x,self.y,self.x+self.width,self.y+self.height,
+                    dog.x,dog.y,dog.x+dog.width,dog.y+dog.height) then
+                    sfx(0)
+                    self.eaten=true
+                    score+=1
+                end
+            end)
+        end,
         draw=function(self)
-            sspr(24,8,self.width,self.height,self.x,self.y,self.width,self.height)
-            -- self:draw_bounding_box(8)
+            if not self.eaten then
+                sspr(24,8,self.width,self.height,self.x,self.y,self.width,self.height)
+            end
         end
     })
 end
 
-function make_player()
-    return make_game_object("player",50,64,16,8,{
+function make_dog()
+    return make_game_object("dog",50,64,16,8,{
         is_walking=false,
         is_facing_right=false,
         walk_timer=0,
+        was_eating_bone=false,
         update=function(self)
             self.walk_timer+=1
             self.walk_timer%=8
@@ -74,7 +89,6 @@ function make_player()
                 end
             end
             sspr(sprite_x,0,self.width,self.height,self.x,self.y,self.width,self.height, self.is_facing_right)
-            -- self:draw_bounding_box(9)
         end
     })
 end
@@ -104,6 +118,24 @@ function make_game_object(kind,x,y,width,height,props)
     add(game_objects, obj)
 end
 
+function lines_overlapping(l1,r1,l2,r2)
+    return r1>l2 and r2>l1
+end
+
+function rects_overlapping(left1,top1,right1,bottom1,left2,top2,right2,bottom2)
+    return lines_overlapping(left1,right1,left2,right2) and lines_overlapping(top1,bottom1,top2,bottom2)
+end
+
+function foreach_game_object_of_kind(kind, callback)
+    local obj
+    for obj in all(game_objects) do
+        if obj.kind == kind then
+            callback(obj)
+        end
+    end
+end
+
+
 __gfx__
 00000000042200000000000004220000000000000422000000000000042200000000000004220000000000000000000000000000000000000000000000000000
 00000000442240000000000044224000000000004422400000000000442240000000000044220000000000000000000000000000000000000000000000000000
@@ -121,3 +153,5 @@ __gfx__
 00000000007000006775000067500000000700000007000000770000077500000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000675000000000000000000000000000000000000057500000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000050000000000000000000000000000000000000055000000000000000000000000000000000000000000000000000000000000000000000
+__sfx__
+0106000018050000001f0501f0401f0301f0200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
