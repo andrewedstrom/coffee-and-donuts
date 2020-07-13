@@ -12,48 +12,52 @@ function _init()
         y=64,
         is_walking=false,
         is_facing_right=false,
-        walk_timer=0
+        walk_timer=0,
+        update=function(self)
+            self.walk_timer+=1
+            self.walk_timer%=8
+
+            self.is_walking=false
+            if btn(0) then 
+                self.is_facing_right=false
+                self.x-=1
+                self.is_walking=true
+            end
+            if btn(1) then 
+                self.is_facing_right=true
+                self.x+=1
+                self.is_walking=true
+            end
+            if btn(2) then 
+                self.y-=1
+            end
+            if btn(3) then 
+                self.y+=1
+            end
+        end,
+        draw=function(self)
+            local sprite_x = 8
+            if self.is_walking then
+                if self.walk_timer < 4 then
+                    sprite_x = 24
+                else
+                    sprite_x = 40            
+                end
+
+            end
+            sspr(sprite_x,0,16,8,self.x,self.y,16,8, self.is_facing_right)
+        end
+
     }
 end
 
 function _update()
-    player.walk_timer+=1
-    player.walk_timer%=8
-
-    player.is_walking=false
-    if btn(0) then 
-        player.is_facing_right=false
-        player.x-=1
-        player.is_walking=true
-    end
-    if btn(1) then 
-        player.is_facing_right=true
-        player.x+=1
-        player.is_walking=true
-    end
-    if btn(2) then 
-        player.y-=1
-    end
-    if btn(3) then 
-        player.y+=1
-    end
-
+   player:update()
 end
 
 function _draw()
     cls(3)
-
-    local sprite_x = 8
-    if player.is_walking then
-        if player.walk_timer < 4 then
-            sprite_x = 24
-        else
-            sprite_x = 40            
-        end
-
-    end
-    sspr(sprite_x,0,16,8,player.x,player.y,16,8, player.is_facing_right)
-
+    player:draw()
 end
 
 __gfx__
