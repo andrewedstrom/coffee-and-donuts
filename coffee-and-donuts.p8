@@ -6,47 +6,37 @@ __lua__
 
 local player
 local bones
+local game_objects
 
 function _init()
-    player=make_player()
-    bones={
-        make_bone(75,20)
-    }
+    game_objects={}
+    make_player()
+    make_bone(75,20)
 end
 
 function _update()
-   player:update()
+    for obj in all(game_objects) do
+        obj:update()
+    end
 end
 
 function _draw()
     cls(3)
-    player:draw()
-    for bone in all(bones) do
-        bone:draw()
+    for obj in all(game_objects) do
+        obj:draw()
     end
 end
 
 function make_bone(x,y)
-    return {
-        x=x,
-        y=y,
-        width=6,
-        height=6,
-        update=function(self)
-
-        end,
+    return make_game_object("bone",x,y,6,6,{
         draw=function(self)
             sspr(24,8,self.width,self.height,self.x,self.y,self.width,self.height)
         end
-    }
+    })
 end
 
 function make_player()
-    return {
-        x=50,
-        y=64,
-        width=16,
-        height=8,
+    return make_game_object("player",50,64,16,8,{
         is_walking=false,
         is_facing_right=false,
         walk_timer=0,
@@ -83,7 +73,29 @@ function make_player()
             end
             sspr(sprite_x,0,self.width,self.height,self.x,self.y,self.width,self.height, self.is_facing_right)
         end
+    })
+end
+
+function make_game_object(kind,x,y,width,height,props)
+    local obj = {
+        kind=kind,
+        x=x,
+        y=y,
+        width=width,
+        height=height,
+        draw=function(self)
+        end,
+        update=function(self)
+        end
     }
+
+    -- add aditional object properties
+    for k,v in pairs(props) do
+        obj[k] = v
+    end
+
+    -- add new object to list of game objects
+    add(game_objects, obj)
 end
 
 __gfx__
